@@ -1,0 +1,160 @@
+# Нормалізація бази до 3НФ
+
+-- Створення таблиці country
+CREATE TABLE country (
+                         id INT AUTO_INCREMENT PRIMARY KEY,
+                         name VARCHAR(255) NOT NULL,
+                         code VARCHAR(10),
+                         UNIQUE(name, code)
+);
+INSERT INTO country (name, code)
+SELECT DISTINCT Entity, Code FROM infectious_cases;
+SELECT * FROM country LIMIT 10;
++--+--------------------+----+
+|id|name                |code|
++--+--------------------+----+
+|1 |Afghanistan         |AFG |
+|2 |Africa              |null|
+|3 |African Region (WHO)|null|
+|4 |Albania             |ALB |
+|5 |Algeria             |DZA |
+|6 |American Samoa      |ASM |
+|7 |Americas            |null|
+|8 |Andorra             |AND |
+|9 |Angola              |AGO |
+|10|Antigua and Barbuda |ATG |
++--+--------------------+----+
+
+
+
+-- Створення таблиці disease
+CREATE TABLE disease (
+                         id INT AUTO_INCREMENT PRIMARY KEY,
+                         name VARCHAR(255) NOT NULL UNIQUE
+);
+INSERT INTO disease (name)
+VALUES
+    ('yaws'),
+    ('polio'),
+    ('guinea_worm'),
+    ('rabies'),
+    ('malaria'),
+    ('hiv'),
+    ('tuberculosis'),
+    ('smallpox'),
+    ('cholera');
+SELECT * FROM disease;
++--+------------+
+|id|name        |
++--+------------+
+|9 |cholera     |
+|3 |guinea_worm |
+|6 |hiv         |
+|5 |malaria     |
+|2 |polio       |
+|4 |rabies      |
+|8 |smallpox    |
+|7 |tuberculosis|
+|1 |yaws        |
++--+------------+
+
+
+-- Створення таблиці disease_case
+CREATE TABLE disease_case (
+                              id INT AUTO_INCREMENT PRIMARY KEY,
+                              country_id INT,
+                              year INT,
+                              disease_id INT,
+                              number_of_cases FLOAT,
+                              FOREIGN KEY (country_id) REFERENCES country(id),
+                              FOREIGN KEY (disease_id) REFERENCES disease(id),
+                              UNIQUE(country_id, year, disease_id)
+);
+-- Вставка даних для кожної хвороби
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'yaws'),
+    ic.Number_yaws
+FROM infectious_cases ic
+WHERE ic.Number_yaws IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'polio'),
+    ic.polio_cases
+FROM infectious_cases ic
+WHERE ic.polio_cases IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'guinea_worm'),
+    ic.cases_guinea_worm
+FROM infectious_cases ic
+WHERE ic.cases_guinea_worm IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'rabies'),
+    ic.Number_rabies
+FROM infectious_cases ic
+WHERE ic.Number_rabies IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'malaria'),
+    ic.Number_malaria
+FROM infectious_cases ic
+WHERE ic.Number_malaria IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'hiv'),
+    ic.Number_hiv
+FROM infectious_cases ic
+WHERE ic.Number_hiv IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'tuberculosis'),
+    ic.Number_tuberculosis
+FROM infectious_cases ic
+WHERE ic.Number_tuberculosis IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'smallpox'),
+    ic.Number_smallpox
+FROM infectious_cases ic
+WHERE ic.Number_smallpox IS NOT NULL;
+INSERT INTO disease_case (country_id, year, disease_id, number_of_cases)
+SELECT
+    (SELECT id FROM country WHERE name = ic.Entity OR code = ic.Code),
+    ic.Year,
+    (SELECT id FROM disease WHERE name = 'cholera'),
+    ic.Number_cholera_cases
+FROM infectious_cases ic
+WHERE ic.Number_cholera_cases IS NOT NULL;
+SELECT * FROM disease_case LIMIT 10;
++--+----------+----+----------+---------------+
+|id|country_id|year|disease_id|number_of_cases|
++--+----------+----+----------+---------------+
+|1 |24        |2010|1         |45             |
+|2 |24        |2012|1         |11             |
+|3 |36        |2010|1         |802            |
+|4 |36        |2011|1         |133            |
+|5 |36        |2012|1         |59             |
+|6 |36        |2013|1         |97             |
+|7 |36        |2014|1         |530            |
+|8 |36        |2015|1         |463            |
+|9 |36        |2016|1         |890            |
+|10|39        |2008|1         |243            |
++--+----------+----+----------+---------------+

@@ -1,0 +1,26 @@
+CREATE FUNCTION year_difference(input_year INT)
+    RETURNS INT
+    DETERMINISTIC
+    RETURN TIMESTAMPDIFF(YEAR, DATE(CONCAT(input_year, '-01-01')), CURDATE());
+
+SELECT
+    dc.id,
+    dc.year,
+    year_difference(dc.year) AS year_diff
+FROM
+    disease_case dc
+LIMIT 10;
++-----+----+---------+
+|id   |year|year_diff|
++-----+----+---------+
+|57616|1960|64       |
+|57617|1965|59       |
+|128  |1980|44       |
+|8319 |1980|44       |
+|129  |1981|43       |
+|8320 |1981|43       |
+|130  |1982|42       |
+|8321 |1982|42       |
+|131  |1983|41       |
+|8322 |1983|41       |
++-----+----+---------+
